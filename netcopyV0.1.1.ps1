@@ -17,7 +17,7 @@ function Display-OpeningMessage {
     Write-Host "5. The name for the folder in the destination."
     Write-Host "   - If left blank, the folder will be named after the computer name."
     Write-Host ""
-    Write-Host "Warning: No path validation is performed. Please ensure that the paths you enter are correct."
+    Write-Host "Warning: No path validation is performed for local paths. Please ensure that the paths you enter are correct."
     Write-Host "Please ensure you have the necessary permissions to access both the source and destination locations."
     Write-Host "The script will attempt to elevate permissions if not run as an administrator."
     Write-Host ""
@@ -110,6 +110,15 @@ function Get-UserInput {
     return $input
 }
 
+# Function to get secure input (masked)
+function Get-SecureInput {
+    param (
+        [string]$prompt
+    )
+    $secureString = Read-Host -Prompt $prompt -AsSecureString
+    return [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureString))
+}
+
 # Function to get yes/no input
 function Get-YesNoInput {
     param (
@@ -141,7 +150,7 @@ try {
 
     if ($isSourceNetworkLocation) {
         $sourceNetworkUsername = Get-UserInput -prompt "Enter the source network username"
-        $sourceNetworkPassword = Get-UserInput -prompt "Enter the source network password" -mandatory $true
+        $sourceNetworkPassword = Get-SecureInput -prompt "Enter the source network password"
         $sourceDriveLetter = "Y:"
 
         # Map network drive for source
@@ -162,7 +171,7 @@ try {
 
     if ($isDestinationNetworkLocation) {
         $destinationNetworkUsername = Get-UserInput -prompt "Enter the destination network username"
-        $destinationNetworkPassword = Get-UserInput -prompt "Enter the destination network password" -mandatory $true
+        $destinationNetworkPassword = Get-SecureInput -prompt "Enter the destination network password"
         $destinationDriveLetter = "Z:"
 
         # Map network drive for destination
